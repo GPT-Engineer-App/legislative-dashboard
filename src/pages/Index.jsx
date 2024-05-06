@@ -46,10 +46,6 @@ const Index = () => {
         <Button rightIcon={isBoardLocked ? <FaUnlock /> : <FaLock />} colorScheme="red" onClick={handleLockBoard}>
           {isBoardLocked ? "Unlock Board" : "Lock Board"}
         </Button>
-        <FormControl>
-          <FormLabel>Vote Title</FormLabel>
-          <Input value={voteTitle} onChange={(e) => setVoteTitle(e.target.value)} placeholder="Enter vote title" />
-        </FormControl>
 
         <Text>Board Status: {isBoardLocked ? "Locked" : "Unlocked"}</Text>
         <VStack>
