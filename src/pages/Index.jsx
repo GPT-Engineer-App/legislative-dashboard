@@ -37,11 +37,10 @@ const Index = () => {
     });
   };
 
-  const handleVote = (vote) => {
-    if (!currentRollCall || isBoardLocked) {
+  const recordVote = () => {
+    if (!currentRollCall) {
       toast({
-        title: "Unable to vote",
-        description: "The board is locked or no roll call is active.",
+        title: "No active roll call",
         status: "error",
         duration: 2000,
         isClosable: true,
@@ -49,9 +48,22 @@ const Index = () => {
       return;
     }
 
+    const voteCounts = currentRollCall.votes.reduce((acc, vote) => {
+      acc[vote] = (acc[vote] || 0) + 1;
+      return acc;
+    }, {});
+
+    toast({
+      title: "Vote Recorded",
+      description: `Aye: ${voteCounts.Aye || 0}, Nay: ${voteCounts.Nay || 0}, Present: ${voteCounts.Present || 0}`,
+      status: "success",
+      duration: 2000,
+      isClosable: true,
+    });
+
     const updatedRollCall = {
       ...currentRollCall,
-      votes: [...currentRollCall.votes, vote],
+      votes: [],
     };
     setRollCalls(rollCalls.map((rc) => (rc.id === currentRollCall.id ? updatedRollCall : rc)));
     setCurrentRollCall(updatedRollCall);
@@ -61,8 +73,8 @@ const Index = () => {
     <Container maxW="container.md" py={8}>
       <VStack spacing={4}>
         <Heading>Legislative Dashboard</Heading>
-        <Button onClick={handleCreateRollCall} colorScheme="blue">
-          Create Roll Call
+        <Button onClick={recordVote} colorScheme="green">
+          Record Vote
         </Button>
         <Button rightIcon={isBoardLocked ? <FaUnlock /> : <FaLock />} colorScheme="red" onClick={handleLockBoard}>
           {isBoardLocked ? "Unlock Board" : "Lock Board"}
@@ -71,7 +83,25 @@ const Index = () => {
           <FormLabel>Vote Title</FormLabel>
           <Input value={voteTitle} onChange={(e) => setVoteTitle(e.target.value)} placeholder="Enter vote title" />
         </FormControl>
-        <RadioGroup onChange={handleVote}>
+        <RadioGroup onChange={(vote) => {
+          if (!currentRollCall || isBoardLocked) {
+            toast({
+              title: "Unable to vote",
+              description: "The board is locked or no roll call is active.",
+              status: "error",
+              duration: 2000,
+              isClosable: true,
+            });
+            return;
+          }
+
+          const updatedRollCall = {
+            ...currentRollCall,
+            votes: [...currentRollCall.votes, vote],
+          };
+          setRollCalls(rollCalls.map((rc) => (rc.id === currentRollCall.id ? updatedRollCall : rc)));
+          setCurrentRollCall(updatedRollCall);
+        }}>
           <Stack direction="row">
             <Radio value="Aye">Aye</Radio>
             <Radio value="Nay">Nay</Radio>
